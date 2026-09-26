@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <meta name="theme-color" content="#081031" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CWordStack" />
+  <title>CWordStack</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css?v=100" />
+</head>
+<body class="study-mode">
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand-row">
+      <div class="brand-lockup">
+        <img src="icons/icon-192.png" alt="CWordStack" class="brand-icon" />
+        <div><strong class="brand-name">CWordStack</strong><div id="pageTitle">오늘의 중국어</div></div>
+      </div>
+      <button id="openDecks" class="icon-btn" type="button" aria-label="단어장 관리">▦</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section id="study" class="panel active">
+      <div class="hero-card">
+        <div class="hero-info-line">
+          <span id="studyActualDate" class="hero-kicker">0000-00-00 (요일)</span>
+          <span class="hero-separator">/</span>
+          <span id="dueSummary" class="hero-sub">오늘복습 0장 · 전체 0장</span>
+        </div>
+        <div class="hero-ring"><strong id="heroDue">0</strong><span>复习</span></div>
+      </div>
+
+      <div class="section-head compact">
+        <div><h3>학습할 단어장</h3><p class="muted">단어장 또는 챕터를 선택하세요.</p></div>
+        <select id="studyDeckFilter"></select>
+      </div>
+
+      <div id="studyEmpty" class="empty-state hidden">
+        <div class="empty-icon">✓</div><h3>복습할 카드가 없습니다</h3>
+        <p>새 카드를 추가하거나 다른 단어장을 선택하세요.</p>
+        <button class="primary" data-go="decks" type="button">단어장 관리</button>
+      </div>
+
+      <div id="studyArea">
+        <div class="study-card-stack">
+          <div class="stack-card-back back-2"></div><div class="stack-card-back back-1"></div>
+          <div id="flashcard" class="flashcard premium-card" tabindex="0" role="button" aria-label="카드 뒤집기">
+            <div class="card-topline"><span id="cardSideLabel" class="pill">앞면</span><span class="tap-hint">탭하여 뒤집기</span></div>
+            <div id="cardMain" class="card-main">카드를 불러오는 중…</div>
+          </div>
+        </div>
+        <div class="study-progress-row">
+          <span id="studyPosition">0 / 0</span>
+          <div class="study-state-toggles">
+            <label class="memory-toggle-wrap repeat-toggle-wrap" for="repeatStatusToggle"><span>반복</span><input id="repeatStatusToggle" class="repeat-status-toggle" type="checkbox"><span class="memory-switch repeat-switch"></span></label>
+            <label class="memory-toggle-wrap" for="memoryStatusToggle"><span id="memoryStatusText">모름</span><input id="memoryStatusToggle" class="memory-status-toggle" type="checkbox" checked><span class="memory-switch"></span></label>
+          </div>
+        </div>
+        <div id="ttsStudyControls" class="action-grid two-col">
+          <button id="speakWordBtn" class="soft-btn" type="button"><span id="speakWordIcon" class="study-audio-icon">🔊</span><span id="speakWordLabel">단어 듣기</span></button>
+          <button id="speakExampleBtn" class="soft-btn" type="button"><span id="speakExampleIcon" class="study-audio-icon">▶</span><span id="speakExampleLabel">예문 듣기</span></button>
+        </div>
+        <div id="ratingBtns" class="rating hidden">
+          <button data-rate="again" class="rate-btn again"><strong>다시</strong><small>오늘</small></button>
+          <button data-rate="hard" class="rate-btn hard"><strong>어려움</strong><small>짧게</small></button>
+          <button data-rate="good" class="rate-btn good"><strong>보통</strong><small>적정</small></button>
+          <button data-rate="easy" class="rate-btn easy"><strong>쉬움</strong><small>길게</small></button>
+        </div>
+        <div class="study-tools">
+          <button id="shuffleStudy" class="text-btn" type="button">↝ 순서 섞기</button>
+          <button id="reverseStudy" class="text-btn" type="button">⇄ 앞/뒤 전환</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="weak" class="panel">
+      <div class="section-head"><div><span class="eyebrow">WEAK WORDS</span><h2>취약단어</h2><p class="muted">모름 표시 또는 오답이 누적된 카드를 모았습니다.</p></div><div id="weakCount" class="count-badge"><strong>0</strong><span>cards</span></div></div>
+      <div id="weakList" class="deck-list"></div>
+    </section>
+
+    <section id="quiz" class="panel">
+      <div class="section-head"><div><span class="eyebrow">QUIZ</span><h2>퀴즈</h2></div></div>
+      <div class="segmented"><button id="normalQuizTab" class="active" type="button">일반퀴즈</button><button id="memoryQuizTab" type="button">암기퀴즈</button></div>
+
+      <div id="normalQuizPanel">
+        <div id="quizSetup" class="surface-card">
+          <div class="form-grid">
+            <label>단어장<select id="quizDeck"></select></label>
+            <label>챕터<select id="quizChapter"><option value="__all">전체 챕터</option></select></label>
+            <label>문제 방식<select id="quizType"><option value="mixed">혼합</option><option value="mcq">객관식</option><option value="subjective">주관식</option></select></label>
+            <label>방향<select id="quizDirection"><option value="cn-ko">중국어 → 한국어</option><option value="ko-cn">한국어 → 중국어</option><option value="mixed">혼합</option></select></label>
+            <label>문제 수<select id="quizCount"><option>10</option><option selected>20</option><option>30</option><option>50</option></select></label>
+          </div>
+          <button id="startQuiz" class="primary big" type="button">퀴즈 시작</button>
+        </div>
+        <div id="quizRun" class="hidden">
+          <div class="quiz-progress"><span id="quizProgress">1 / 10</span><strong id="quizScore">0점</strong></div>
+          <div class="quiz-card"><div id="quizPrompt" class="quiz-prompt"></div><div id="quizAnswerArea"></div><div id="quizFeedback" class="quiz-feedback"></div></div>
+          <button id="quizNext" class="primary big hidden" type="button">다음 문제</button>
+        </div>
+        <div id="quizResult" class="surface-card hidden"></div>
+      </div>
+
+      <div id="memoryQuizPanel" class="hidden">
+        <div class="surface-card">
+          <div class="memory-mode-head"><div><h3>암기퀴즈</h3><p id="memoryQuizDescription" class="muted">한국어를 듣고 중국어로 즉시 답하는 훈련입니다.</p></div><div class="segmented compact-segment"><button id="memoryKrMode" class="active" type="button">KR</button><button id="memoryCnMode" type="button">CN</button></div></div>
+          <div class="form-grid two">
+            <label>단어장<select id="memoryQuizDeck"></select></label>
+            <label>챕터<select id="memoryQuizChapter"></select></label>
+          </div>
+          <div class="segmented memory-list-tabs"><button id="memoryWordListTab" class="active" type="button">한국어 단어 목록</button><button id="memoryExampleListTab" type="button">한국어 예문 목록</button></div>
+          <div class="memory-table-wrap"><table><thead><tr><th class="num-col">순번</th><th id="memoryTableHeading">한국어 단어</th></tr></thead><tbody id="memoryQuizTable"></tbody></table></div>
+          <div class="memory-actions"><button id="startMemoryWord" class="primary" type="button">단어암기 시작</button><button id="startMemoryExample" class="secondary" type="button">예문암기 시작</button><button id="stopMemoryQuiz" class="danger" type="button">중지</button></div>
+          <p id="memoryQuizStatus" class="sync-status">대기 중</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stats" class="panel">
+      <div class="section-head"><div><span class="eyebrow">PROGRESS</span><h2>통계</h2><p class="muted">CWordStack 학습 기록입니다.</p></div></div>
+      <div id="statsGrid" class="stats-grid"></div>
+      <div class="surface-card chart-card"><div class="chart-head"><div><h3>월별 학습시간</h3><p class="muted">올해 기록</p></div><select id="statsYear"></select></div><div id="monthChart" class="month-chart"></div></div>
+      <div class="surface-card"><h3>단어장 · 챕터별 현황</h3><div id="deckStats"></div></div>
+    </section>
+
+    <section id="settings" class="panel">
+      <div class="section-head"><div><span class="eyebrow">SETTINGS</span><h2>설정</h2></div></div>
+      <div class="settings-card">
+        <h3>중국어 음성</h3>
+        <label class="toggle-row"><span><strong>음성 읽기</strong><small>중국어·한국어 TTS 사용</small></span><input id="ttsEnabled" type="checkbox"></label>
+        <label>중국어 음성<select id="ttsLocale"><option value="zh-CN">중국 본토 표준중국어</option><option value="zh-TW">대만 중국어</option></select></label>
+        <label>속도<select id="ttsRate"><option value="0.7">0.7×</option><option value="1">1.0×</option><option value="1.2">1.2×</option></select></label>
+      </div>
+      <div class="settings-card"><h3>암기퀴즈 발화간격</h3><label>간격<select id="memoryInterval"></select></label><p class="muted">한 항목의 발화가 끝난 뒤 다음 항목을 읽기까지의 간격입니다.</p></div>
+      <div class="settings-card"><h3>플래시카드 앞면/뒷면</h3><div class="face-config-grid"><fieldset><legend>앞면</legend><div id="frontFields" class="check-grid"></div></fieldset><fieldset><legend>뒷면</legend><div id="backFields" class="check-grid"></div></fieldset></div></div>
+      <div class="settings-card"><h3>Google 동기화</h3><label>OAuth Client ID<input id="googleClientId" placeholder="...apps.googleusercontent.com"></label><label>Google Sheet URL<input id="googleSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../edit"></label><div class="row wrap"><button id="saveGoogleSettings" class="primary" type="button">저장</button><button id="googleSyncBtn" class="secondary" type="button">☁ 구글동기화</button><button id="openGoogleSheet" class="secondary" type="button">Google 시트 열기</button></div><p id="googleSyncStatus" class="sync-status">연결 정보를 입력하세요.</p></div>
+      <div class="settings-card"><h3>데이터</h3><div class="row wrap"><button id="exportDbExcelSettings" class="secondary" type="button">전체 DB 엑셀</button><button id="backupJson" class="secondary" type="button">JSON 백업</button><label class="file-btn secondary">백업 복원<input id="restoreJson" type="file" accept=".json" hidden></label><button id="resetData" class="danger" type="button">전체 초기화</button></div></div>
+    </section>
+
+    <section id="decks" class="panel">
+      <div class="section-head"><div><span class="eyebrow">WORD DATABASE</span><h2>단어장 · 카드 관리</h2></div><button id="backToStudy" class="secondary" type="button">학습으로</button></div>
+      <div class="stack-grid">
+        <div class="surface-card">
+          <h3 id="cardFormTitle">카드 추가</h3>
+          <form id="cardForm">
+            <input id="editCardId" type="hidden" />
+            <label>중국어 단어*<input id="chineseWordInput" required placeholder="예: 学习"></label>
+            <label>병음 / Pinyin<input id="pinyinInput" placeholder="예: xuéxí"></label>
+            <label>품사 / Part of Speech<input id="partOfSpeechInput" placeholder="예: verb"></label>
+            <label>중국어 예문<textarea id="chineseExampleInput" placeholder="예: 我每天学习汉语。"></textarea></label>
+            <label>한국어 뜻*<textarea id="koreanMeaningInput" required placeholder="예: 공부하다, 배우다"></textarea></label>
+            <label>한국어 예문<textarea id="koreanExampleInput" placeholder="예: 나는 매일 중국어를 공부한다."></textarea></label>
+            <label>단어장 / Category<input id="deckInput" value="기본 단어장"></label>
+            <label>챕터 / Chapter<input id="chapterInput" placeholder="예: 1과"></label>
+            <label>태그 / Tags<input id="tagsInput" placeholder="예: HSK, 중요"></label>
+            <div class="row"><button class="primary" type="submit">저장</button><button id="cancelEdit" class="secondary hidden" type="button">수정 취소</button></div>
+          </form>
+        </div>
+        <div>
+          <div class="surface-card"><h3>엑셀 가져오기/내보내기</h3><p class="muted">ChineseWord, Pinyin, PartOfSpeech, ChineseExample, KoreanMeaning, KoreanExample, Category, Chapter, Tags 열을 사용합니다.</p><input id="excelInput" type="file" accept=".xlsx,.xls,.csv"><div class="row wrap"><button id="importExcel" class="primary" type="button">엑셀 불러오기</button><button id="exportExcel" class="secondary" type="button">현재 목록 엑셀</button><button id="exportDbExcel" class="secondary" type="button">전체 DB 엑셀</button><button id="googleSyncBtnCards" class="secondary" type="button">☁ 구글동기화</button></div></div>
+          <div class="surface-card"><h3>단어장 현황</h3><div id="deckLibrary" class="deck-list"></div></div>
+        </div>
+      </div>
+      <div class="surface-card filter-card"><input id="searchCards" placeholder="중국어, 병음, 뜻, 태그 검색"><select id="deckFilter"></select><select id="chapterFilter"><option value="__all">전체 챕터</option></select></div>
+      <div id="cardsMobileList" class="cards-mobile-list"></div>
+      <div class="table-wrap desktop-table"><table><thead><tr><th>중국어</th><th>병음</th><th>뜻</th><th>단어장</th><th>챕터</th><th>관리</th></tr></thead><tbody id="cardsTable"></tbody></table></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="하단 메인 메뉴">
+    <button class="nav-item active" data-tab="study"><span>⌂</span><small>학습</small></button>
+    <button class="nav-item" data-tab="weak"><span>◆</span><small>취약단어</small></button>
+    <button class="nav-item nav-quiz" data-tab="quiz"><span>?</span><small>퀴즈</small></button>
+    <button class="nav-item" data-tab="stats"><span>▥</span><small>통계</small></button>
+    <button class="nav-item" data-tab="settings"><span>⚙</span><small>설정</small></button>
+  </nav>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="app.js?v=100"></script>
+<script src="google-sync.js?v=100"></script>
+</body>
+</html>
