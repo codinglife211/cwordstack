@@ -1,3 +1,17 @@
+
+function updateCWordStackViewportHeight(){
+  const vv=window.visualViewport;
+  const h=Math.max(320,Math.round(vv?vv.height:window.innerHeight));
+  document.documentElement.style.setProperty('--cws-visual-height',`${h}px`);
+}
+updateCWordStackViewportHeight();
+window.addEventListener('resize',updateCWordStackViewportHeight,{passive:true});
+window.addEventListener('orientationchange',updateCWordStackViewportHeight,{passive:true});
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',updateCWordStackViewportHeight,{passive:true});
+  window.visualViewport.addEventListener('scroll',updateCWordStackViewportHeight,{passive:true});
+}
+
 'use strict';
 const $=id=>document.getElementById(id);
 const STORAGE_KEY='cwordstack_state_v1';
