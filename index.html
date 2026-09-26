@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=101" />
+  <link rel="stylesheet" href="styles.css?v=102" />
 </head>
 <body class="study-mode">
 <div class="app-shell">
@@ -154,6 +154,7 @@
             <label>병음 / Pinyin<input id="pinyinInput" placeholder="예: xuéxí"></label>
             <label>품사 / Part of Speech<input id="partOfSpeechInput" placeholder="예: verb"></label>
             <label>중국어 예문<textarea id="chineseExampleInput" placeholder="예: 我每天学习汉语。"></textarea></label>
+            <label>예문 병음 / Example Pinyin<textarea id="examplePinyinInput" placeholder="예: wǒ měitiān xuéxí Hànyǔ."></textarea></label>
             <label>한국어 뜻*<textarea id="koreanMeaningInput" required placeholder="예: 공부하다, 배우다"></textarea></label>
             <label>한국어 예문<textarea id="koreanExampleInput" placeholder="예: 나는 매일 중국어를 공부한다."></textarea></label>
             <label>단어장 / Category<input id="deckInput" value="기본 단어장"></label>
@@ -163,7 +164,7 @@
           </form>
         </div>
         <div>
-          <div class="surface-card"><h3>엑셀 가져오기/내보내기</h3><p class="muted">ChineseWord, Pinyin, PartOfSpeech, ChineseExample, KoreanMeaning, KoreanExample, Category, Chapter, Tags 열을 사용합니다.</p><input id="excelInput" type="file" accept=".xlsx,.xls,.csv"><div class="row wrap"><button id="importExcel" class="primary" type="button">엑셀 불러오기</button><button id="exportExcel" class="secondary" type="button">현재 목록 엑셀</button><button id="exportDbExcel" class="secondary" type="button">전체 DB 엑셀</button><button id="googleSyncBtnCards" class="secondary" type="button">☁ 구글동기화</button></div></div>
+          <div class="surface-card"><h3>엑셀 가져오기/내보내기</h3><p class="muted">ChineseWord, Pinyin, PartOfSpeech, ChineseExample, ExamplePinyin, KoreanMeaning, KoreanExample, Category, Chapter, Tags 열을 사용합니다.</p><input id="excelInput" type="file" accept=".xlsx,.xls,.csv"><div class="row wrap"><button id="importExcel" class="primary" type="button">엑셀 불러오기</button><button id="exportExcel" class="secondary" type="button">현재 목록 엑셀</button><button id="exportDbExcel" class="secondary" type="button">전체 DB 엑셀</button><button id="googleSyncBtnCards" class="secondary" type="button">☁ 구글동기화</button></div></div>
           <div class="surface-card"><h3>단어장 현황</h3><div id="deckLibrary" class="deck-list"></div></div>
         </div>
       </div>
@@ -184,7 +185,7 @@
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="app.js?v=101"></script>
-<script src="google-sync.js?v=101"></script>
+<script src="app.js?v=102"></script>
+<script src="google-sync.js?v=102"></script>
 </body>
 </html>

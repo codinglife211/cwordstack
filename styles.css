@@ -3,282 +3,98 @@
 @media(max-width:700px){body.study-mode{height:100dvh;overflow:hidden}.app-shell{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) 60px;overflow:hidden}.app-header{grid-row:1;padding:7px 10px}.brand-icon{width:31px;height:31px}.brand-name{font-size:15px}.icon-btn{width:32px;height:32px}.app-main{grid-row:2;min-height:0;overflow:hidden;padding:5px 8px}.bottom-nav{grid-row:3;position:relative;height:60px}.panel.active#study{height:100%;display:flex;flex-direction:column;overflow:hidden}.hero-card{flex:0 0 49px;min-height:49px;height:49px;border-radius:14px;padding:6px 9px}.hero-kicker{font-size:11px}.hero-sub{font-size:10px}.hero-ring{width:37px;height:37px}.section-head.compact{flex:0 0 34px;height:34px;margin:0 0 4px}.section-head.compact h3{font-size:11px;margin:0}.section-head.compact select{height:30px;padding:3px 7px;font-size:10px}.panel.active#study #studyArea{flex:1;min-height:0;display:flex;flex-direction:column;gap:4px;overflow:hidden}.study-card-stack{flex:1;min-height:110px}.study-progress-row{flex:0 0 27px}.action-grid{flex:0 0 40px}.soft-btn{min-height:40px;font-size:12px}.rating{flex:0 0 40px}.study-tools{flex:0 0 35px}.text-btn{min-height:35px;font-size:11px}.face-example{font-size:16px}.face-meta{font-size:15px}.stack-grid,.form-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}.desktop-table{display:none}.cards-mobile-list{display:grid;gap:8px}.card-list-item{background:#111a45;border:1px solid var(--border);border-radius:15px;padding:12px}.memory-mode-head{align-items:stretch;flex-direction:column}.compact-segment{min-width:0}body:not(.study-mode) .app-main{overflow:auto;padding-bottom:80px}}
 
 
-/* ==========================================================
-   CWordStack v1.0.1 — Android responsive layout repair
-   - Study: one-screen fixed layout
-   - Other tabs: normal full-width vertical scrolling
-   - Removes grid centering caused by margin:auto
-   ========================================================== */
-@media (max-width:700px){
-  html{
-    width:100%;
-    min-height:100%;
-    overflow-x:hidden;
+/* CWordStack v1.0.1 — ExamplePinyin + compact metadata row */
+.face-example-pinyin{
+  width:100%;
+  margin-top:-1px;
+  padding:5px 10px 7px;
+  font-size:17px;
+  line-height:1.35;
+  font-weight:750;
+  color:#7256c8;
+  background:#faf8ff;
+  border-radius:0 0 12px 12px;
+  text-align:center;
+  word-break:normal;
+}
+.face-example.zh:has(+ .face-example-pinyin){
+  margin-bottom:0;
+  border-radius:12px 12px 0 0;
+}
+.face-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:nowrap;
+  gap:6px;
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  scrollbar-width:none;
+  padding:2px 0;
+}
+.face-meta-row::-webkit-scrollbar{display:none}
+.face-meta-row .compact-meta{
+  flex:0 0 auto;
+  margin:0;
+  font-size:15px;
+  padding:4px 7px;
+}
+.face-meta-row .meta-sep{
+  flex:0 0 auto;
+  color:#9aa0b5;
+  font-size:14px;
+  font-weight:800;
+}
+@media(max-width:700px){
+  body.study-mode #study .face-example-pinyin{
+    font-size:15px;
+    line-height:1.3;
+    padding:4px 8px 6px;
   }
-  body{
-    width:100%;
-    min-height:100%;
-    overflow-x:hidden;
+  body.study-mode #study .face-meta-row{
+    gap:4px;
   }
-
-  /* ---------- Study tab: only this screen is viewport-locked ---------- */
-  body.study-mode{
-    height:100dvh !important;
-    min-height:100dvh !important;
-    max-height:100dvh !important;
-    overflow:hidden !important;
+  body.study-mode #study .face-meta-row .compact-meta{
+    font-size:12px;
+    padding:3px 5px;
   }
-  body.study-mode .app-shell{
-    width:100% !important;
-    max-width:none !important;
-    height:100dvh !important;
-    min-height:100dvh !important;
-    max-height:100dvh !important;
-    display:grid !important;
-    grid-template-rows:auto minmax(0,1fr) 60px !important;
-    overflow:hidden !important;
-  }
-  body.study-mode .app-header{
-    grid-row:1 !important;
-    width:100% !important;
-    margin:0 !important;
-    padding:7px 12px !important;
-  }
-  body.study-mode .app-main{
-    grid-row:2 !important;
-    width:100% !important;
-    max-width:none !important;
-    min-width:0 !important;
-    min-height:0 !important;
-    margin:0 !important;
-    padding:5px 10px 4px !important;
-    overflow:hidden !important;
-  }
-  body.study-mode .bottom-nav{
-    grid-row:3 !important;
-    position:relative !important;
-    left:auto !important;
-    right:auto !important;
-    bottom:auto !important;
-    width:100% !important;
-    height:60px !important;
-    margin:0 !important;
-  }
-  body.study-mode #study.panel.active{
-    width:100% !important;
-    max-width:none !important;
-    height:100% !important;
-    min-height:0 !important;
-    margin:0 !important;
-    overflow:hidden !important;
-    display:flex !important;
-    flex-direction:column !important;
-  }
-  body.study-mode #study .hero-card,
-  body.study-mode #study .section-head.compact,
-  body.study-mode #study #studyArea{
-    width:100% !important;
-    max-width:none !important;
-    margin-left:0 !important;
-    margin-right:0 !important;
-  }
-
-  /* ---------- Every non-study tab: document scrolls normally ---------- */
-  body:not(.study-mode){
-    height:auto !important;
-    min-height:100dvh !important;
-    max-height:none !important;
-    overflow-x:hidden !important;
-    overflow-y:auto !important;
-    overscroll-behavior-y:auto !important;
-  }
-  body:not(.study-mode) .app-shell{
-    width:100% !important;
-    max-width:none !important;
-    height:auto !important;
-    min-height:100dvh !important;
-    max-height:none !important;
-    display:block !important;
-    overflow:visible !important;
-  }
-  body:not(.study-mode) .app-header{
-    position:sticky !important;
-    top:0 !important;
-    z-index:40 !important;
-    width:100% !important;
-    margin:0 !important;
-    padding:9px 12px !important;
-  }
-  body:not(.study-mode) .app-main{
-    display:block !important;
-    width:100% !important;
-    max-width:700px !important;
-    min-width:0 !important;
-    height:auto !important;
-    min-height:0 !important;
-    max-height:none !important;
-    margin:0 auto !important;
-    padding:12px 14px 86px !important;
-    overflow:visible !important;
-  }
-  body:not(.study-mode) .panel.active{
-    display:block !important;
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-    height:auto !important;
-    min-height:0 !important;
-    max-height:none !important;
-    margin:0 !important;
-    overflow:visible !important;
-  }
-  body:not(.study-mode) .bottom-nav{
-    position:fixed !important;
-    left:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-    width:100% !important;
-    height:60px !important;
-    margin:0 !important;
-    z-index:50 !important;
-  }
-
-  /* Remove the large empty top band on non-study screens. */
-  body:not(.study-mode) .section-head{
-    width:100% !important;
-    margin:14px 2px 12px !important;
-  }
-  body:not(.study-mode) .section-head h2{
-    font-size:28px !important;
-    line-height:1.15 !important;
-  }
-
-  /* ---------- Quiz / memory quiz: never overflow the phone width ---------- */
-  #quiz,
-  #normalQuizPanel,
-  #memoryQuizPanel,
-  #memoryQuizPanel .surface-card,
-  #quizSetup{
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-  }
-  #quiz .segmented,
-  #memoryQuizPanel .segmented,
-  #memoryQuizPanel .memory-mode-head,
-  #memoryQuizPanel .form-grid,
-  #memoryQuizPanel .memory-actions{
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-  }
-  #memoryQuizPanel .memory-mode-head{
-    display:flex !important;
-    flex-direction:column !important;
-    gap:9px !important;
-  }
-  #memoryQuizPanel .compact-segment{
-    width:100% !important;
-    min-width:0 !important;
-    margin:0 !important;
-  }
-  #memoryQuizPanel .form-grid.two{
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:7px !important;
-  }
-  #memoryQuizPanel .memory-list-tabs{
-    grid-template-columns:1fr 1fr !important;
-  }
-  #memoryQuizPanel .memory-list-tabs button{
-    min-width:0 !important;
-    padding:0 5px !important;
-    font-size:12px !important;
-    white-space:normal !important;
-    line-height:1.2 !important;
-  }
-  #memoryQuizPanel .memory-table-wrap{
-    width:100% !important;
-    max-width:100% !important;
-    overflow-x:auto !important;
-    overflow-y:visible !important;
-    -webkit-overflow-scrolling:touch;
-  }
-  #memoryQuizPanel .memory-table-wrap table{
-    width:100% !important;
-    min-width:0 !important;
-    table-layout:fixed !important;
-  }
-  #memoryQuizPanel .memory-table-wrap .num-col{
-    width:58px !important;
-  }
-  #memoryQuizPanel .memory-table-wrap th,
-  #memoryQuizPanel .memory-table-wrap td{
-    white-space:normal !important;
-    word-break:break-word !important;
-  }
-  #memoryQuizPanel .memory-actions{
-    display:grid !important;
-    grid-template-columns:1fr 1fr !important;
-    gap:7px !important;
-  }
-  #memoryQuizPanel .memory-actions .danger{
-    grid-column:1 / -1 !important;
-  }
-
-  /* ---------- Stats: responsive and vertically scrollable ---------- */
-  #stats .stats-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    width:100% !important;
-  }
-  #stats .surface-card{
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-  }
-  #stats .month-chart{
-    width:100% !important;
-    min-width:0 !important;
-    overflow-x:auto !important;
-  }
-
-  /* ---------- Settings: normal vertical document flow ---------- */
-  #settings,
-  #settings .settings-card{
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-  }
-  #settings .face-config-grid{
-    grid-template-columns:1fr 1fr !important;
-    gap:8px !important;
-  }
-  #settings fieldset{
-    min-width:0 !important;
-    padding:9px !important;
-  }
-  #settings .row.wrap{
-    align-items:stretch !important;
-  }
-
-  /* Form controls must not create horizontal overflow. */
-  input,select,textarea,button{
-    max-width:100%;
-  }
-  .surface-card,.settings-card{
-    max-width:100%;
-    min-width:0;
+  body.study-mode #study .face-meta-row .meta-sep{
+    font-size:12px;
   }
 }
 
-@media (max-width:380px){
-  #settings .face-config-grid{
-    grid-template-columns:1fr !important;
+
+/* CWordStack v1.0.2 — Category / Chapter / Tags inline, separate items */
+.face-meta-row{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:nowrap !important;
+  gap:7px !important;
+  width:100%;
+  max-width:100%;
+  margin-top:6px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  scrollbar-width:none;
+}
+.face-meta-row::-webkit-scrollbar{display:none}
+.face-meta-row .compact-meta{
+  flex:0 0 auto;
+  margin:0 !important;
+}
+.face-meta-row .meta-sep{display:none !important;}
+@media(max-width:700px){
+  body.study-mode #study .face-meta-row{
+    gap:5px !important;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
   }
-  #memoryQuizPanel .memory-actions{
-    grid-template-columns:1fr !important;
-  }
-  #memoryQuizPanel .memory-actions .danger{
-    grid-column:auto !important;
+  body.study-mode #study .face-meta-row .compact-meta{
+    flex:0 0 auto !important;
   }
 }
