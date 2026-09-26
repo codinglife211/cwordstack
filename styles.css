@@ -340,3 +340,135 @@
   body.study-mode .bottom-nav{height:56px!important;min-height:56px!important;max-height:56px!important;}
   body.study-mode .bottom-nav .nav-item{height:47px!important;min-height:47px!important;}
 }
+
+/* ==========================================================
+   CWordStack v1.0.4 — MOBILE LAYOUT RESET
+   모든 모바일 탭을 HEADER / CONTENT / BOTTOM NAV 3행으로 고정.
+   핵심: 데스크톱용 .app-main { margin:auto }를 모바일에서 제거해
+   본문이 세로 중앙으로 내려가는 현상을 방지한다.
+   ========================================================== */
+@media (max-width:700px){
+  html,
+  body{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  body{
+    height:var(--cws-visual-height,100svh)!important;
+    min-height:var(--cws-visual-height,100svh)!important;
+    max-height:var(--cws-visual-height,100svh)!important;
+  }
+
+  .app-shell{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr) 60px!important;
+    overflow:hidden!important;
+  }
+
+  .app-header{
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    position:relative!important;
+    top:auto!important;
+    left:auto!important;
+    right:auto!important;
+    align-self:stretch!important;
+    justify-self:stretch!important;
+  }
+
+  .app-main{
+    grid-row:2!important;
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:12px 16px 14px!important;
+    align-self:stretch!important;
+    justify-self:stretch!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+  }
+
+  .panel.active{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+  }
+
+  .bottom-nav{
+    grid-row:3!important;
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    height:60px!important;
+    min-height:60px!important;
+    max-height:60px!important;
+    margin:0!important;
+    padding:4px 5px!important;
+    align-self:stretch!important;
+    justify-self:stretch!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  }
+
+  /* 학습 탭만 페이지 스크롤 없이 남은 높이를 정확히 사용 */
+  body.study-mode .app-main{
+    height:100%!important;
+    margin:0!important;
+    padding:4px 8px 3px!important;
+    overflow:hidden!important;
+  }
+
+  body.study-mode #study.panel.active{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  /* 일반 탭은 헤더 바로 밑에서 시작 */
+  body:not(.study-mode) .panel.active > .section-head:first-child{
+    margin-top:8px!important;
+  }
+
+  #weak.panel.active,
+  #quiz.panel.active,
+  #stats.panel.active,
+  #settings.panel.active,
+  #decks.panel.active{
+    margin-top:0!important;
+    padding-top:0!important;
+  }
+}
