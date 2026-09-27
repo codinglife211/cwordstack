@@ -21,9 +21,3 @@ ChineseWord | Pinyin | PartOfSpeech | ChineseExample | KoreanMeaning | KoreanExa
 - GitHub Pages 정적 배포
 
 CWordStack은 기존 WordStack과 다른 localStorage 키를 사용하므로 동일 기기에서 데이터가 섞이지 않습니다.
-
-
-CWordStack v1.0.1: ExamplePinyin 필드 추가, 중국어 예문 바로 아래 예문 병음 표시, Category/Chapter/Tags 한 줄 표시, Google Sync 10열(A:J) 지원.
-
-
-CWordStack v1.0.3: Android visualViewport 기반 첫 화면/하단 탭 레이아웃 수정.
