@@ -48,7 +48,32 @@ function renderStudyFilter(){const el=$('studyDeckFilter');if(!el)return;const p
 
 function fieldValue(c,k){return c?.[k]??''}
 function sideFields(side){return side==='front'?settings.frontFields:settings.backFields}
-function renderCardSide(c,side){const fields=sideFields(side);const out=[];for(const k of fields){const v=fieldValue(c,k);if(!String(v).trim())continue;if(k==='chineseWord'||k==='koreanMeaning')out.push(`<div class="face-primary ${k==='chineseWord'?'zh':'ko'}">${esc(v)}</div>`);else if(k==='pinyin')out.push(`<div class="face-pinyin">${esc(v)}</div>`);else if(k==='chineseExample'||k==='koreanExample')out.push(`<div class="face-example ${k==='chineseExample'?'zh':'ko'}">${esc(v)}</div>`);else out.push(`<span class="face-meta">${esc(v)}</span>`)}return out.join('')||'<div class="muted">표시할 정보가 없습니다. 설정에서 필드를 선택하세요.</div>'}
+function renderCardSide(c,side){
+  const fields=sideFields(side),out=[],metaKeys=['category','chapter','tags'];
+  let metaRendered=false;
+  for(const k of fields){
+    if(metaKeys.includes(k)){
+      if(!metaRendered){
+        const metaItems=metaKeys
+          .filter(m=>fields.includes(m))
+          .map(m=>({key:m,value:String(fieldValue(c,m)||'').trim()}))
+          .filter(x=>x.value);
+        if(metaItems.length){
+          const chips=metaItems.map(x=>`<span class="face-meta-chip meta-${x.key}" title="${esc(x.value)}">${esc(x.value)}</span>`).join('');
+          out.push(`<div class="face-meta-row">${chips}</div>`);
+        }
+        metaRendered=true;
+      }
+      continue;
+    }
+    const v=fieldValue(c,k);if(!String(v).trim())continue;
+    if(k==='chineseWord'||k==='koreanMeaning')out.push(`<div class="face-primary ${k==='chineseWord'?'zh':'ko'}">${esc(v)}</div>`);
+    else if(k==='pinyin')out.push(`<div class="face-pinyin">${esc(v)}</div>`);
+    else if(k==='chineseExample'||k==='koreanExample')out.push(`<div class="face-example ${k==='chineseExample'?'zh':'ko'}">${esc(v)}</div>`);
+    else out.push(`<span class="face-meta">${esc(v)}</span>`);
+  }
+  return out.join('')||'<div class="muted">표시할 정보가 없습니다. 설정에서 필드를 선택하세요.</div>';
+}
 function currentStudySide(){return studyFlipped?'back':'front'}
 function studySpeechTarget(c,kind){const fields=sideFields(currentStudySide());if(kind==='word'){if(fields.includes('koreanMeaning')&&c.koreanMeaning)return{text:c.koreanMeaning,lang:'ko-KR'};if(fields.includes('chineseWord')&&c.chineseWord)return{text:c.chineseWord,lang:settings.ttsLocale};if(c.chineseWord)return{text:c.chineseWord,lang:settings.ttsLocale};if(c.koreanMeaning)return{text:c.koreanMeaning,lang:'ko-KR'}}else{if(fields.includes('koreanExample')&&c.koreanExample)return{text:c.koreanExample,lang:'ko-KR'};if(fields.includes('chineseExample')&&c.chineseExample)return{text:c.chineseExample,lang:settings.ttsLocale};if(c.chineseExample)return{text:c.chineseExample,lang:settings.ttsLocale};if(c.koreanExample)return{text:c.koreanExample,lang:'ko-KR'}}return{text:'',lang:'zh-CN'}}
 function chooseVoice(lang){const vs=speechSynthesis?.getVoices?.()||[];return vs.find(v=>v.lang.toLowerCase()===String(lang).toLowerCase())||vs.find(v=>v.lang.toLowerCase().startsWith(String(lang).slice(0,2).toLowerCase()))||null}
@@ -65,11 +90,30 @@ function refreshStudy(force=true){renderStudyFilter();const filter=$('studyDeckF
 function navigateStudyCard(dir){stopStudyRepeat(true);if(!studyQueue.length)return;const ni=studyIndex+(dir==='next'?1:-1);if(ni<0)return toast('첫 번째 카드입니다.');if(ni>=studyQueue.length)return toast('마지막 카드입니다.');studyIndex=ni;studyFlipped=false;showStudyCard()}
 function schedule(c,rate){let interval=Math.max(0,c.interval||0),ease=Math.max(1.3,c.ease||2.5),reps=c.reps||0;if(rate==='again'){interval=0;c.lapses=(c.lapses||0)+1;ease=Math.max(1.3,ease-.2);c.wrongCount=(c.wrongCount||0)+1;c.memoryUnknown=true}else if(rate==='hard'){interval=reps===0?1:Math.max(1,interval*1.2);ease=Math.max(1.3,ease-.15);reps++}else if(rate==='good'){interval=reps===0?1:reps===1?3:Math.max(2,interval*ease);reps++}else{interval=reps===0?3:reps===1?6:Math.max(4,interval*ease*1.3);ease+=.15;reps++;c.memoryUnknown=false}c.ease=+ease.toFixed(2);c.interval=Math.round(interval);c.reps=reps;c.reviews=(c.reviews||0)+1;c.lastReviewed=todayISO();c.due=rate==='again'?todayISO():addDays(c.interval);state.reviewHistory.push({date:new Date().toISOString(),cardId:c.id,rate});persist()}
 
-let swipe={active:false,x:0,y:0,lastX:0,lastY:0,suppress:false};const cardEl=$('flashcard');
-function swipeStart(x,y){swipe={active:true,x,y,lastX:x,lastY:y,suppress:false};cardEl.classList.add('swiping')}
-function swipeMove(x,y){if(!swipe.active)return;swipe.lastX=x;swipe.lastY=y;const dx=x-swipe.x,dy=y-swipe.y;if(Math.abs(dx)>Math.abs(dy)){const d=Math.max(-120,Math.min(120,dx));cardEl.style.transform=`translateX(${d}px) rotate(${d/35}deg)`}}
-function swipeEnd(x,y){if(!swipe.active)return;swipe.active=false;cardEl.classList.remove('swiping');cardEl.style.transform='';const dx=x-swipe.x,dy=y-swipe.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.2){swipe.suppress=true;setTimeout(()=>swipe.suppress=false,250);navigateStudyCard(dx<0?'next':'prev')}}
-cardEl.addEventListener('touchstart',e=>{if(e.touches.length===1)swipeStart(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});cardEl.addEventListener('touchmove',e=>{if(e.touches.length===1)swipeMove(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});cardEl.addEventListener('touchend',e=>{const t=e.changedTouches[0];if(t)swipeEnd(t.clientX,t.clientY)},{passive:true});cardEl.addEventListener('click',()=>{if(swipe.suppress)return;stopStudyRepeat(true);studyFlipped=!studyFlipped;showStudyCard()});cardEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cardEl.click()}if(e.key==='ArrowLeft')navigateStudyCard('prev');if(e.key==='ArrowRight')navigateStudyCard('next')});
+let swipe={active:false,x:0,y:0,lastX:0,lastY:0,axis:null,suppress:false};const cardEl=$('flashcard');
+function swipeStart(x,y){swipe={active:true,x,y,lastX:x,lastY:y,axis:null,suppress:false};cardEl.classList.add('swiping')}
+function swipeMove(x,y,e){
+  if(!swipe.active)return;
+  swipe.lastX=x;swipe.lastY=y;
+  const dx=x-swipe.x,dy=y-swipe.y,ax=Math.abs(dx),ay=Math.abs(dy);
+  if(!swipe.axis){if(ax<8&&ay<8)return;swipe.axis=ax>ay?'x':'y'}
+  if(swipe.axis!=='x')return;
+  if(e&&e.cancelable)e.preventDefault();
+  const d=Math.max(-120,Math.min(120,dx));
+  cardEl.style.transform=`translate3d(${d}px,0,0) rotate(${d/35}deg)`;
+}
+function swipeEnd(x,y){
+  if(!swipe.active)return;
+  const axis=swipe.axis,dx=x-swipe.x,dy=y-swipe.y;
+  swipe.active=false;cardEl.classList.remove('swiping');cardEl.style.transform='';
+  if(axis==='x'&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.2){swipe.suppress=true;setTimeout(()=>swipe.suppress=false,250);navigateStudyCard(dx<0?'next':'prev')}
+}
+function swipeCancel(){if(!swipe.active)return;swipe.active=false;swipe.axis=null;cardEl.classList.remove('swiping');cardEl.style.transform=''}
+cardEl.addEventListener('touchstart',e=>{if(e.touches.length===1)swipeStart(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});
+cardEl.addEventListener('touchmove',e=>{if(e.touches.length===1)swipeMove(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
+cardEl.addEventListener('touchend',e=>{const t=e.changedTouches[0];if(t)swipeEnd(t.clientX,t.clientY)},{passive:true});
+cardEl.addEventListener('touchcancel',swipeCancel,{passive:true});
+cardEl.addEventListener('click',()=>{if(swipe.suppress)return;stopStudyRepeat(true);studyFlipped=!studyFlipped;showStudyCard()});cardEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cardEl.click()}if(e.key==='ArrowLeft')navigateStudyCard('prev');if(e.key==='ArrowRight')navigateStudyCard('next')});
 
 $('repeatStatusToggle').addEventListener('change',e=>{studyRepeatEnabled=e.target.checked;if(!studyRepeatEnabled)stopStudyRepeat(true);else syncStudyRepeatUI();toast(studyRepeatEnabled?'반복 재생 ON — 3초 간격':'반복 재생 OFF')});$('memoryStatusToggle').addEventListener('change',e=>{const c=studyQueue[studyIndex];if(!c)return;c.memoryUnknown=e.target.checked;$('memoryStatusText').textContent=c.memoryUnknown?'모름':'암기완료';markDirty(c);persist();renderWeakList()});$('speakWordBtn').onclick=()=>playStudy('word');$('speakExampleBtn').onclick=()=>playStudy('example');$('shuffleStudy').onclick=()=>{stopStudyRepeat(true);studyQueue=shuffle(studyQueue);studyIndex=0;studyFlipped=false;showStudyCard()};$('reverseStudy').onclick=()=>{stopStudyRepeat(true);const a=settings.frontFields;settings.frontFields=[...settings.backFields];settings.backFields=[...a];saveSettings();renderFieldOptions();studyFlipped=false;showStudyCard();toast('앞/뒤 구성을 바꿨습니다.')};$('studyDeckFilter').onchange=()=>{stopStudyRepeat(true);studyQueue=[];studyIndex=0;refreshStudy(true)};$('ratingBtns').onclick=e=>{const b=e.target.closest('button[data-rate]');if(!b)return;const c=studyQueue[studyIndex];schedule(c,b.dataset.rate);markDirty(c);if(b.dataset.rate==='again')studyQueue.push(c);studyIndex++;if(studyIndex>=studyQueue.length){toast('오늘의 학습을 마쳤습니다.');studyQueue=[];studyIndex=0;refreshStudy(true)}else{studyFlipped=false;showStudyCard()}renderAll()};
 

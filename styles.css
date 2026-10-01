@@ -330,3 +330,99 @@ th{background:#082828!important;color:#BBE0DA!important;}
 .splash-loader{position:absolute;bottom:max(54px,env(safe-area-inset-bottom));width:150px;height:3px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;}
 .splash-loader span{display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#58E0C9,#20B79E,#55C2E0);animation:cwsload 1.15s ease-in-out infinite alternate;}
 @keyframes cwsload{from{transform:translateX(-18%)}to{transform:translateX(155%)}}
+
+
+/* ==========================================================
+   CWordStack v1.2.2 — independent metadata chips + Android swipe isolation
+   ========================================================== */
+.face-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:3px 0 0;
+  padding:0 4px;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.face-meta-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  max-width:34%;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:clamp(11px,3.1vw,15px);
+  font-weight:800;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  box-shadow:inset 0 0 0 1px rgba(15,55,70,.05);
+}
+.face-meta-chip.meta-category{
+  background:#DDF7F1;
+  color:#176E61;
+}
+.face-meta-chip.meta-chapter{
+  background:#E3F0FF;
+  color:#2E63A5;
+}
+.face-meta-chip.meta-tags{
+  background:#FFF0D8;
+  color:#8B5B17;
+}
+
+/* Only the card owns horizontal swipe gestures.  Never let the page pan sideways. */
+html,body{overflow-x:clip!important;max-width:100%!important;}
+body.study-mode{
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none!important;
+}
+body.study-mode .app-shell,
+body.study-mode .app-main,
+body.study-mode #study,
+body.study-mode #studyArea,
+body.study-mode .study-card-stack{
+  max-width:100%!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-x:none!important;
+}
+body.study-mode .study-card-stack{
+  overflow:hidden!important;
+  contain:paint;
+}
+body.study-mode #flashcard{
+  max-width:100%!important;
+  touch-action:pan-y!important;
+  overscroll-behavior-x:none!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+  -webkit-touch-callout:none!important;
+  will-change:transform;
+  transform-origin:center center;
+}
+body.study-mode #flashcard:not(.swiping){
+  transition:transform .16s ease-out;
+}
+body.study-mode #flashcard.swiping{
+  transition:none!important;
+}
+
+@media(max-width:700px){
+  body.study-mode .face-meta-row{
+    flex:0 0 auto;
+    gap:4px;
+    padding:0 2px;
+    margin-top:2px;
+  }
+  body.study-mode .face-meta-chip{
+    max-width:34%;
+    padding:4px 7px;
+    font-size:clamp(10px,2.8vw,13px);
+  }
+}
