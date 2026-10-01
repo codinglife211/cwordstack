@@ -90,30 +90,86 @@ function refreshStudy(force=true){renderStudyFilter();const filter=$('studyDeckF
 function navigateStudyCard(dir){stopStudyRepeat(true);if(!studyQueue.length)return;const ni=studyIndex+(dir==='next'?1:-1);if(ni<0)return toast('첫 번째 카드입니다.');if(ni>=studyQueue.length)return toast('마지막 카드입니다.');studyIndex=ni;studyFlipped=false;showStudyCard()}
 function schedule(c,rate){let interval=Math.max(0,c.interval||0),ease=Math.max(1.3,c.ease||2.5),reps=c.reps||0;if(rate==='again'){interval=0;c.lapses=(c.lapses||0)+1;ease=Math.max(1.3,ease-.2);c.wrongCount=(c.wrongCount||0)+1;c.memoryUnknown=true}else if(rate==='hard'){interval=reps===0?1:Math.max(1,interval*1.2);ease=Math.max(1.3,ease-.15);reps++}else if(rate==='good'){interval=reps===0?1:reps===1?3:Math.max(2,interval*ease);reps++}else{interval=reps===0?3:reps===1?6:Math.max(4,interval*ease*1.3);ease+=.15;reps++;c.memoryUnknown=false}c.ease=+ease.toFixed(2);c.interval=Math.round(interval);c.reps=reps;c.reviews=(c.reviews||0)+1;c.lastReviewed=todayISO();c.due=rate==='again'?todayISO():addDays(c.interval);state.reviewHistory.push({date:new Date().toISOString(),cardId:c.id,rate});persist()}
 
-let swipe={active:false,x:0,y:0,lastX:0,lastY:0,axis:null,suppress:false};const cardEl=$('flashcard');
-function swipeStart(x,y){swipe={active:true,x,y,lastX:x,lastY:y,axis:null,suppress:false};cardEl.classList.add('swiping')}
-function swipeMove(x,y,e){
-  if(!swipe.active)return;
-  swipe.lastX=x;swipe.lastY=y;
-  const dx=x-swipe.x,dy=y-swipe.y,ax=Math.abs(dx),ay=Math.abs(dy);
-  if(!swipe.axis){if(ax<8&&ay<8)return;swipe.axis=ax>ay?'x':'y'}
+let swipe={active:false,pointerId:null,x:0,y:0,lastX:0,lastY:0,axis:null,suppress:false,startedAt:0};const cardEl=$('flashcard');
+const SWIPE_DISTANCE_PX=35;
+const SWIPE_FAST_DISTANCE_PX=22;
+const SWIPE_VELOCITY_PX_MS=.45;
+function resetSwipeVisual(){
+  cardEl.classList.remove('swiping');
+  cardEl.style.transform='';
+}
+function suppressCardClick(ms=320){
+  swipe.suppress=true;
+  clearTimeout(suppressCardClick._t);
+  suppressCardClick._t=setTimeout(()=>{swipe.suppress=false},ms);
+}
+function swipeStartPointer(e){
+  if(e.isPrimary===false)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  swipe.active=true;
+  swipe.pointerId=e.pointerId;
+  swipe.x=swipe.lastX=e.clientX;
+  swipe.y=swipe.lastY=e.clientY;
+  swipe.axis=null;
+  swipe.startedAt=performance.now();
+  cardEl.classList.add('swiping');
+  try{cardEl.setPointerCapture(e.pointerId)}catch(_){ }
+}
+function swipeMovePointer(e){
+  if(!swipe.active||e.pointerId!==swipe.pointerId)return;
+  const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;
+  swipe.lastX=e.clientX;swipe.lastY=e.clientY;
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  if(!swipe.axis){
+    if(ax<6&&ay<6)return;
+    swipe.axis=ax>=ay?'x':'y';
+  }
   if(swipe.axis!=='x')return;
-  if(e&&e.cancelable)e.preventDefault();
-  const d=Math.max(-120,Math.min(120,dx));
-  cardEl.style.transform=`translate3d(${d}px,0,0) rotate(${d/35}deg)`;
+  if(e.cancelable)e.preventDefault();
+  const limit=Math.min(150,Math.max(95,cardEl.clientWidth*.42));
+  const d=Math.max(-limit,Math.min(limit,dx));
+  cardEl.style.transform=`translate3d(${d}px,0,0) rotate(${d/42}deg)`;
 }
-function swipeEnd(x,y){
+function swipeEndPointer(e){
+  if(!swipe.active||e.pointerId!==swipe.pointerId)return;
+  const endX=Number.isFinite(e.clientX)?e.clientX:swipe.lastX;
+  const endY=Number.isFinite(e.clientY)?e.clientY:swipe.lastY;
+  const dx=endX-swipe.x,dy=endY-swipe.y;
+  const elapsed=Math.max(1,performance.now()-swipe.startedAt);
+  const velocity=dx/elapsed;
+  const horizontalEnough=Math.abs(dx)>=Math.abs(dy)*.8;
+  const farEnough=Math.abs(dx)>=SWIPE_DISTANCE_PX;
+  const fastEnough=Math.abs(dx)>=SWIPE_FAST_DISTANCE_PX&&Math.abs(velocity)>=SWIPE_VELOCITY_PX_MS;
+  const shouldNavigate=swipe.axis==='x'&&horizontalEnough&&(farEnough||fastEnough);
+  if(Math.abs(dx)>10)suppressCardClick();
+  swipe.active=false;
+  swipe.pointerId=null;
+  resetSwipeVisual();
+  if(shouldNavigate)navigateStudyCard(dx<0?'next':'prev');
+  try{if(cardEl.hasPointerCapture?.(e.pointerId))cardEl.releasePointerCapture(e.pointerId)}catch(_){ }
+}
+function swipeCancelPointer(e){
   if(!swipe.active)return;
-  const axis=swipe.axis,dx=x-swipe.x,dy=y-swipe.y;
-  swipe.active=false;cardEl.classList.remove('swiping');cardEl.style.transform='';
-  if(axis==='x'&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.2){swipe.suppress=true;setTimeout(()=>swipe.suppress=false,250);navigateStudyCard(dx<0?'next':'prev')}
+  if(e&&swipe.pointerId!==null&&e.pointerId!==swipe.pointerId)return;
+  swipe.active=false;
+  swipe.pointerId=null;
+  resetSwipeVisual();
 }
-function swipeCancel(){if(!swipe.active)return;swipe.active=false;swipe.axis=null;cardEl.classList.remove('swiping');cardEl.style.transform=''}
-cardEl.addEventListener('touchstart',e=>{if(e.touches.length===1)swipeStart(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});
-cardEl.addEventListener('touchmove',e=>{if(e.touches.length===1)swipeMove(e.touches[0].clientX,e.touches[0].clientY,e)},{passive:false});
-cardEl.addEventListener('touchend',e=>{const t=e.changedTouches[0];if(t)swipeEnd(t.clientX,t.clientY)},{passive:true});
-cardEl.addEventListener('touchcancel',swipeCancel,{passive:true});
-cardEl.addEventListener('click',()=>{if(swipe.suppress)return;stopStudyRepeat(true);studyFlipped=!studyFlipped;showStudyCard()});cardEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cardEl.click()}if(e.key==='ArrowLeft')navigateStudyCard('prev');if(e.key==='ArrowRight')navigateStudyCard('next')});
+if(window.PointerEvent){
+  cardEl.addEventListener('pointerdown',swipeStartPointer);
+  cardEl.addEventListener('pointermove',swipeMovePointer,{passive:false});
+  cardEl.addEventListener('pointerup',swipeEndPointer);
+  cardEl.addEventListener('pointercancel',swipeCancelPointer);
+  cardEl.addEventListener('lostpointercapture',e=>{if(swipe.active&&e.pointerId===swipe.pointerId)swipeCancelPointer(e)});
+}else{
+  /* Fallback for older WebViews */
+  cardEl.addEventListener('touchstart',e=>{const t=e.touches[0];if(!t)return;swipeStartPointer({isPrimary:true,pointerType:'touch',pointerId:1,clientX:t.clientX,clientY:t.clientY,button:0})},{passive:true});
+  cardEl.addEventListener('touchmove',e=>{const t=e.touches[0];if(!t)return;swipeMovePointer({pointerId:1,clientX:t.clientX,clientY:t.clientY,cancelable:e.cancelable,preventDefault:()=>e.preventDefault()})},{passive:false});
+  cardEl.addEventListener('touchend',e=>{const t=e.changedTouches[0];if(!t)return;swipeEndPointer({pointerId:1,clientX:t.clientX,clientY:t.clientY})},{passive:true});
+  cardEl.addEventListener('touchcancel',()=>swipeCancelPointer({pointerId:1}),{passive:true});
+}
+cardEl.addEventListener('click',()=>{if(swipe.suppress)return;stopStudyRepeat(true);studyFlipped=!studyFlipped;showStudyCard()});
+cardEl.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();cardEl.click()}if(e.key==='ArrowLeft')navigateStudyCard('prev');if(e.key==='ArrowRight')navigateStudyCard('next')});
 
 $('repeatStatusToggle').addEventListener('change',e=>{studyRepeatEnabled=e.target.checked;if(!studyRepeatEnabled)stopStudyRepeat(true);else syncStudyRepeatUI();toast(studyRepeatEnabled?'반복 재생 ON — 3초 간격':'반복 재생 OFF')});$('memoryStatusToggle').addEventListener('change',e=>{const c=studyQueue[studyIndex];if(!c)return;c.memoryUnknown=e.target.checked;$('memoryStatusText').textContent=c.memoryUnknown?'모름':'암기완료';markDirty(c);persist();renderWeakList()});$('speakWordBtn').onclick=()=>playStudy('word');$('speakExampleBtn').onclick=()=>playStudy('example');$('shuffleStudy').onclick=()=>{stopStudyRepeat(true);studyQueue=shuffle(studyQueue);studyIndex=0;studyFlipped=false;showStudyCard()};$('reverseStudy').onclick=()=>{stopStudyRepeat(true);const a=settings.frontFields;settings.frontFields=[...settings.backFields];settings.backFields=[...a];saveSettings();renderFieldOptions();studyFlipped=false;showStudyCard();toast('앞/뒤 구성을 바꿨습니다.')};$('studyDeckFilter').onchange=()=>{stopStudyRepeat(true);studyQueue=[];studyIndex=0;refreshStudy(true)};$('ratingBtns').onclick=e=>{const b=e.target.closest('button[data-rate]');if(!b)return;const c=studyQueue[studyIndex];schedule(c,b.dataset.rate);markDirty(c);if(b.dataset.rate==='again')studyQueue.push(c);studyIndex++;if(studyIndex>=studyQueue.length){toast('오늘의 학습을 마쳤습니다.');studyQueue=[];studyIndex=0;refreshStudy(true)}else{studyFlipped=false;showStudyCard()}renderAll()};
 

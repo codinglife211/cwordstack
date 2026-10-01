@@ -398,7 +398,7 @@ body.study-mode .study-card-stack{
 }
 body.study-mode #flashcard{
   max-width:100%!important;
-  touch-action:pan-y!important;
+  touch-action:none!important;
   overscroll-behavior-x:none!important;
   -webkit-user-select:none!important;
   user-select:none!important;
@@ -426,3 +426,7 @@ body.study-mode #flashcard.swiping{
     font-size:clamp(10px,2.8vw,13px);
   }
 }
+
+/* CWordStack v1.2.3 — reliable card swipe */
+body.study-mode #flashcard{cursor:grab!important;}
+body.study-mode #flashcard.swiping{cursor:grabbing!important;}
